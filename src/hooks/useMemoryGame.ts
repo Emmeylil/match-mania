@@ -68,6 +68,33 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
+function shuffleUnmatchedCards(cards: Card[]): Card[] {
+  const matchedIndices: number[] = [];
+  const unmatchedCards: Card[] = [];
+  
+  cards.forEach((card, index) => {
+    if (card.isMatched) {
+      matchedIndices.push(index);
+    } else {
+      unmatchedCards.push(card);
+    }
+  });
+  
+  const shuffled = shuffleArray(unmatchedCards);
+  const result: Card[] = [];
+  let unmatchedIdx = 0;
+  
+  for (let i = 0; i < cards.length; i++) {
+    if (matchedIndices.includes(i)) {
+      result.push(cards[i]);
+    } else {
+      result.push({ ...shuffled[unmatchedIdx], id: i });
+      unmatchedIdx++;
+    }
+  }
+  return result;
+}
+
 function createCards(difficulty: Difficulty): Card[] {
   const { pairs } = DIFFICULTY_CONFIG[difficulty];
   const selected = shuffleArray(ICONS).slice(0, pairs);
@@ -189,9 +216,10 @@ export function useMemoryGame() {
 
               flippedRef.current = [];
               lockRef.current = false;
+              const shuffledCards = won ? matched : shuffleUnmatchedCards(matched);
               return {
                 ...p,
-                cards: matched,
+                cards: shuffledCards,
                 moves: newMoves,
                 matchedPairs: newMatchedPairs,
                 isWon: won,
@@ -217,11 +245,12 @@ export function useMemoryGame() {
                     ? { ...c, isFlipped: false, animState: "idle" as const }
                     : c
                 );
+                const shuffledReset = shuffleUnmatchedCards(reset);
                 const lost = newMoves >= p.maxMoves;
                 if (lost) stopTimer();
                 flippedRef.current = [];
                 lockRef.current = false;
-                return { ...p, cards: reset, isLost: lost };
+                return { ...p, cards: lost ? reset : shuffledReset, isLost: lost };
               });
             }, 400);
           }, 600);
