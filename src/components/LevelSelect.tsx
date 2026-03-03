@@ -16,45 +16,55 @@ const LevelSelect = ({ onSelect, dailyPlaysLeft }: LevelSelectProps) => {
 
   return (
     <div className="flex flex-col items-center gap-8 animate-fade-in w-full max-w-sm mx-auto px-4">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-display text-foreground">
-          Memory<span className="text-primary">Match</span>
+      <div className="text-center space-y-3">
+        <div className="flex justify-center mb-2">
+          <div className="bg-primary text-white px-4 py-2 rounded-xl font-black text-3xl tracking-tighter shadow-xl transform -rotate-1">
+            JUMIA
+          </div>
+        </div>
+        <h1 className="text-4xl font-black text-gray-800 tracking-tight">
+          Match<span className="text-primary">Mania</span>
         </h1>
-        <p className="text-muted-foreground text-sm">Flip the cards to find matching pairs</p>
+        <p className="text-gray-500 font-medium">Flip the cards to win exclusive rewards!</p>
       </div>
 
       {noPlays ? (
-        <div className="text-center space-y-3 bg-card rounded-2xl p-6 border border-border">
-          <p className="text-xl font-display text-accent">⏰ Come back tomorrow!</p>
-          <p className="text-muted-foreground text-sm">You've used all your daily plays. Your plays reset each day.</p>
+        <div className="text-center space-y-4 bg-white rounded-3xl p-8 border-2 border-primary/20 shadow-xl">
+          <div className="text-5xl mb-2">⏰</div>
+          <p className="text-2xl font-black text-gray-800">Come back later!</p>
+          <p className="text-gray-500 font-medium leading-relaxed">You've reached your daily limit. Fresh rewards await you tomorrow!</p>
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-3 w-full">
+          <div className="flex flex-col gap-4 w-full">
             {levels.map((level) => (
               <button
                 key={level.key}
                 onClick={() => onSelect(level.key)}
-                className="group relative bg-card hover:bg-muted border border-border rounded-2xl p-4 text-left transition-all active:scale-[0.98] hover:glow-primary"
+                className="group relative bg-white hover:bg-primary/5 border-2 border-primary/10 hover:border-primary/30 rounded-2xl p-5 text-left transition-all active:scale-[0.98] shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-display text-lg text-foreground group-hover:text-primary transition-colors">
+                    <h3 className="font-black text-xl text-gray-800 group-hover:text-primary transition-colors">
                       {level.label}
                     </h3>
-                    <p className="text-sm text-muted-foreground">{level.desc} · {level.cards} cards</p>
+                    <p className="text-sm text-gray-500 font-medium">{level.desc} · {level.cards} Items</p>
                   </div>
-                  <div className="text-2xl">
-                    {level.key === "easy" ? "🌟" : level.key === "medium" ? "🔥" : "💎"}
+                  <div className="bg-primary/10 p-3 rounded-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all">
+                    <span className="text-2xl">
+                      {level.key === "easy" ? "🎁" : level.key === "medium" ? "🚀" : "💎"}
+                    </span>
                   </div>
                 </div>
               </button>
             ))}
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            {dailyPlaysLeft} play{dailyPlaysLeft !== 1 ? "s" : ""} remaining today
-          </p>
+          <div className="bg-white/50 backdrop-blur-sm px-6 py-2 rounded-full border border-primary/10 shadow-sm">
+            <p className="text-sm font-black text-primary uppercase tracking-widest">
+              {dailyPlaysLeft} plays left today
+            </p>
+          </div>
         </>
       )}
     </div>

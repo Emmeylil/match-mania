@@ -1,3 +1,9 @@
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { submitScore } from "@/services/leaderboardService";
+import Leaderboard from "./Leaderboard";
+import { Button } from "@/components/ui/button";
+
 interface EndScreenProps {
   isWon: boolean;
   reward: string | null;
@@ -9,53 +15,82 @@ interface EndScreenProps {
 }
 
 const EndScreen = ({ isWon, reward, score, flips, difficulty, onReplay, dailyPlaysLeft }: EndScreenProps) => {
+  const { user } = useAuth();
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isWon && user && !submitted) {
+      submitScore(user.name, user.email, score, difficulty);
+      setSubmitted(true);
+    }
+  }, [isWon, user, score, difficulty, submitted]);
+
+  if (showLeaderboard) {
+    return (
+      <div className="flex flex-col items-center gap-6 w-full max-w-2xl px-4">
+        <Leaderboard />
+        <Button
+          onClick={() => setShowLeaderboard(false)}
+          className="bg-primary hover:bg-primary/90 text-white font-bold py-6 text-lg rounded-xl shadow-md w-full max-w-sm"
+        >
+          Back to Results
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-6 animate-scale-in w-full max-w-sm mx-auto px-4 text-center">
-      <div className="text-6xl">
-        {isWon ? "🎉" : "😢"}
+      <div className="text-6xl mb-2">
+        {isWon ? "🏆" : "⌛"}
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-3xl font-display text-foreground">
-          {isWon ? "You Won!" : "Time's Up!"}
+        <h2 className="text-4xl font-bold text-gray-800">
+          {isWon ? "Nicely Done!" : "Time's Over!"}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-gray-500 font-medium">
           {isWon
-            ? `Completed ${difficulty} in ${flips} flips!`
-            : "Better luck next time — try again!"}
+            ? `Fantastic! You cleared ${difficulty} mode in ${flips} flips.`
+            : "Don't give up! Every match counts towards the top spot."}
         </p>
       </div>
 
       {/* Score */}
-      <div className="bg-card border border-border rounded-2xl p-5 w-full">
-        <p className="text-4xl font-display text-primary font-bold">{score} pts</p>
-        <p className="text-xs text-muted-foreground mt-1">Final Score</p>
+      <div className="bg-white border-2 border-primary/20 rounded-3xl p-8 w-full shadow-lg transform rotate-1">
+        <p className="text-12 text-gray-400 font-bold uppercase tracking-widest mb-1">Your Score</p>
+        <p className="text-6xl font-black text-primary drop-shadow-sm">{score.toLocaleString()}</p>
       </div>
 
       {reward && (
-        <div className="bg-accent/10 border border-accent/30 rounded-2xl p-5 w-full glow-accent">
-          <p className="text-accent font-display text-lg">{reward}</p>
-          <p className="text-xs text-muted-foreground mt-1">Share with friends to multiply your rewards!</p>
+        <div className="bg-primary/5 border-2 border-primary/20 border-dashed rounded-3xl p-6 w-full transform -rotate-1">
+          <p className="text-primary font-bold text-xl mb-1">{reward}</p>
+          <p className="text-xs text-gray-500 font-medium">Claim this reward in your Jumia account!</p>
         </div>
       )}
 
-      {!isWon && (
-        <div className="bg-card border border-border rounded-2xl p-4 w-full">
-          <p className="text-sm text-muted-foreground">💡 Try again to improve your score and unlock rewards!</p>
-        </div>
-      )}
+      <div className="flex flex-col gap-3 w-full">
+        <Button
+          onClick={onReplay}
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-8 text-xl rounded-2xl shadow-xl transition-all active:scale-[0.98] hover:scale-[1.02]"
+        >
+          {dailyPlaysLeft > 0 ? "Play Again" : "Return home"}
+        </Button>
 
-      <button
-        onClick={onReplay}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-display text-lg rounded-2xl py-4 transition-all active:scale-[0.98] glow-primary"
-      >
-        {dailyPlaysLeft > 0 ? "Play Again" : "Back to Menu"}
-      </button>
+        <Button
+          variant="outline"
+          onClick={() => setShowLeaderboard(true)}
+          className="w-full border-primary text-primary hover:bg-primary/10 font-bold py-6 text-lg rounded-2xl"
+        >
+          View Leaderboard
+        </Button>
+      </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm font-bold text-gray-400">
         {dailyPlaysLeft > 0
-          ? `${dailyPlaysLeft} play${dailyPlaysLeft !== 1 ? "s" : ""} remaining today`
-          : "Come back tomorrow for more plays!"}
+          ? `${dailyPlaysLeft} play${dailyPlaysLeft !== 1 ? "s" : ""} left for today`
+          : "You've reached your limit - see you tomorrow!"}
       </p>
     </div>
   );
